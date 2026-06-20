@@ -1,0 +1,211 @@
+{
+  "arms": [
+    "baseline",
+    "skeptical",
+    "ultravalidate"
+  ],
+  "flaws": [
+    "confounded",
+    "underpowered",
+    "unproven",
+    "unreconciled",
+    "unfair",
+    "exploratory",
+    "regression to the mean",
+    "survivorship bias",
+    "multiple comparisons",
+    "incomplete metric"
+  ],
+  "recall": {
+    "baseline": {
+      "hit": 60,
+      "n": 60,
+      "pct": 100
+    },
+    "skeptical": {
+      "hit": 60,
+      "n": 60,
+      "pct": 100
+    },
+    "ultravalidate": {
+      "hit": 60,
+      "n": 60,
+      "pct": 100
+    }
+  },
+  "overflag": {
+    "baseline": {
+      "f": 0,
+      "n": 10,
+      "pct": 0
+    },
+    "skeptical": {
+      "f": 1,
+      "n": 10,
+      "pct": 10
+    },
+    "ultravalidate": {
+      "f": 2,
+      "n": 10,
+      "pct": 20
+    }
+  },
+  "byFlaw": {
+    "baseline": {
+      "confounded": {
+        "hit": 10,
+        "n": 10,
+        "pct": 100
+      },
+      "underpowered": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "unproven": {
+        "hit": 10,
+        "n": 10,
+        "pct": 100
+      },
+      "unreconciled": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "unfair": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "exploratory": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "regression to the mean": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "survivorship bias": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "multiple comparisons": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "incomplete metric": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      }
+    },
+    "skeptical": {
+      "confounded": {
+        "hit": 10,
+        "n": 10,
+        "pct": 100
+      },
+      "underpowered": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "unproven": {
+        "hit": 10,
+        "n": 10,
+        "pct": 100
+      },
+      "unreconciled": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "unfair": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "exploratory": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "regression to the mean": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "survivorship bias": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "multiple comparisons": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "incomplete metric": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      }
+    },
+    "ultravalidate": {
+      "confounded": {
+        "hit": 10,
+        "n": 10,
+        "pct": 100
+      },
+      "underpowered": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "unproven": {
+        "hit": 10,
+        "n": 10,
+        "pct": 100
+      },
+      "unreconciled": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "unfair": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "exploratory": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "regression to the mean": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "survivorship bias": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "multiple comparisons": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      },
+      "incomplete metric": {
+        "hit": 5,
+        "n": 5,
+        "pct": 100
+      }
+    }
+  }
+}

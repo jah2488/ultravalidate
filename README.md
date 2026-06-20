@@ -49,52 +49,50 @@ Every verdict ships with a plain gloss, so a reader never has to decode jargon:
 | **unproven** | the experiment that would prove it has not been run |
 | **refuted** | the evidence points the other way |
 
-## Worked case study: validating flint's benchmarks
+## The benefit a benchmark cannot capture
 
-ultravalidate does not produce a score. It produces honest claims. The clearest demonstration is the
-benchmark suite for [flint](https://github.com/jah2488/flint), where every number went through these
-five checks, which is *why* it carries significance tests, confidence intervals, disclosed confounds,
-and labeled negatives instead of round, confident wins.
+The largest thing ultravalidate does is make the model stop and go check. Left alone, an agent reports
+a number from the middle of a long context, or from how it remembers the code working, or from a
+pattern in its training data, and that number is often subtly wrong. ultravalidate forces the move
+that catches this: go back to the rawest source on disk, recompute, and state the claim only after it
+reconciles. It re-asserts what is actually true on disk in place of what was assumed. That habit is
+the hardest part to put on a chart, because it shows up as the wrong answers you never have to see.
 
-**Power, made to clear a gate.** The headline was not reported until n reached 20 and a Mann-Whitney
-test put every task below p < 0.05 (six of seven below 1e-6), with 95% CIs that exclude zero. An
-earlier n=5 number was labeled exploratory until then.
+## What a one-shot benchmark does and does not show
 
-<p align="center">
-  <img src="assets/benchmark.svg" alt="flint vs baseline per-task reductions with confidence intervals, n=20, significant" width="640">
-</p>
-
-**Confound, disclosed not hidden.** The harness could not strip the operator's `CLAUDE.md` from the
-baseline, so the baseline is a *strong* one and the measured gap is a conservative lower bound, stated
-plainly. And the small-model arms are marked **not significant** (grey), because their apparent
-reductions are partly degenerate (the answers fail a fidelity floor). They are not counted as wins.
+I still measured it. Twelve claims each carry a planted validation flaw: confounds, an underpowered
+sample, an unreconciled number, and four subtle statistical traps (regression to the mean,
+survivorship, multiple comparisons, an incomplete metric). Two more claims are sound. Three reviewers
+assess each one: a plain "should I trust this?", the same prompt told to be skeptical, and ultravalidate.
 
 <p align="center">
-  <img src="assets/cross-model.svg" alt="pooled reduction by model; small local models marked not significant" width="600">
+  <img src="assets/benchmark.svg" alt="single-shot detection saturates: all three reviewers catch 100% of planted flaws; they differ only in strictness on valid claims" width="600">
 </p>
 
-**Falsifier, run to the breaking point.** Pushing compression past the safe setting (the experimental
-`feral` level) was kept *because* it shows where the claim fails: output keeps shrinking, but the
-correctness and fidelity gate drops to 77%. A claim of "free compression" is falsified exactly there,
-and the chart says so.
+The detection result is a clean null. Every reviewer caught every planted flaw, the subtle ones
+included. A capable model, even asked plainly, already names the confound when the context sits in
+front of it. The one axis that moves is strictness on the sound claims, where ultravalidate is the
+most conservative: it withholds trust on a claim it cannot reconcile from source. At ten valid-claim
+assessments per arm, that 0 to 20% spread is within noise.
 
-<p align="center">
-  <img src="assets/intensity.svg" alt="intensity dose-response; the feral level shows where the gate starts failing" width="600">
-</p>
+This is the expected result, and it points back to the section above. Naming a flaw that is already
+on screen is easy, so a single-shot test cannot separate a careful model from ultravalidate. The
+discipline that earns its keep is going back to the source before reporting, on the claims where the
+flaw is not written into the context and the model would otherwise trust its own memory. A detection
+benchmark cannot reach that, which is exactly why the re-grounding habit is the headline and this
+chart is the footnote.
 
-**Reconcile from source.** Every cell above is recomputed from the rawest per-record data by a
-hand-rolled stats script (Mann-Whitney U + bootstrap CIs), not from a summary, so the charts and the
-prose cannot drift from the data. **Fairness:** same model, prompt, base, and n across arms; only the
-skill text differs.
+_n=210 assessments on `claude-haiku-4-5`. Detection is keyword-based and applied identically to every
+arm. Reproduce it with [`benchmarks/`](benchmarks/)._
 
-And the smallest worked example, on a claim with no benchmark at all. Given "the new cache cut p99
-40%", ultravalidate answers: "**Verdict: confounded** (a load drop happened in the same window, so
-the 40% cannot be credited to the cache). Weakest defensible restatement: p99 fell ~40% over a window
-that also saw lower load; the cache's contribution is unproven until an equal-load A/B runs."
+## The smallest worked example
+
+Given "our new Redis cache cut p99 latency 40%", with a note that total traffic also fell about 30% in
+the same window, ultravalidate answers: **Verdict: confounded.** A load drop landed in the same window,
+so the 40% cannot be credited to the cache. Weakest defensible restatement: p99 fell ~40% over a window
+that also saw lower load, and the cache's contribution stays unproven until an equal-load A/B runs.
 
 ## Lineage
 
 ultravalidate is one of four disciplines fused into [flint](https://github.com/jah2488/flint), where
-the reflex runs before every reported result. The charts above are flint's measured outputs, shown
-here as the discipline applied; their full methodology and caveats live in
-[flint's benchmarks](https://github.com/jah2488/flint/tree/main/benchmarks). MIT licensed.
+the reflex runs before every reported result. MIT licensed.
