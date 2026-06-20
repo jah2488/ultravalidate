@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "ultravalidate",
+  "description": "Refute-don't-confirm validation for any result, number, or PR claim.",
+  "owner": {
+    "name": "Justin Herrick",
+    "url": "https://github.com/jah2488"
+  },
+  "plugins": [
+    {
+      "name": "ultravalidate",
+      "description": "Adversarial validation: reconcile from source, hunt confounds, under-claim by default.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

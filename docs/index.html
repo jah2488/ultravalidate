@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Refute, Don't Confirm</title>
+<style>
+:root{--fg:#1a1a1a;--muted:#6b7280;--faint:#9aa0aa;--bg:#fff;--card:#f7f7f8;--border:#e5e7eb;--accent:#0f766e}
+@media(prefers-color-scheme:dark){:root{--fg:#e7e7e9;--muted:#9ca3af;--faint:#6b7280;--bg:#121413;--card:#1c1f1e;--border:#293230;--accent:#2dd4bf}}
+*{box-sizing:border-box}
+body{font:17px/1.7 Georgia,"Iowan Old Style","Palatino Linotype",serif;color:var(--fg);background:var(--bg);max-width:680px;margin:0 auto;padding:4rem 1.5rem 6rem}
+header{text-align:center;margin-bottom:3rem}
+h1{font-size:2rem;font-weight:600;margin:0 0 .75rem;letter-spacing:-.01em}
+.rule{width:48px;height:2px;background:var(--accent);margin:1.25rem auto;border:0}
+.preamble{color:var(--muted);font-style:italic;font-size:1.05rem;max-width:34rem;margin:0 auto}
+.values{list-style:none;padding:0;margin:2.5rem 0;text-align:center}
+.values li{margin:1.15rem 0}
+.values .l{font-weight:600}
+.values .over{display:block;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin:.15rem 0}
+.values .r{color:var(--faint)}
+.caveat{text-align:center;color:var(--muted);font-style:italic;font-size:.95rem;max-width:34rem;margin:2rem auto 0;padding-top:1.5rem;border-top:1px solid var(--border)}
+h2{text-align:center;font-size:1.15rem;font-weight:600;margin:4rem 0 2rem;letter-spacing:.01em}
+.principle{display:flex;gap:1rem;margin:1.5rem 0;align-items:baseline}
+.num{font-size:.95rem;color:var(--accent);font-weight:700;min-width:2.4rem;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums}
+.principle p{margin:0}
+.principle .lead{font-weight:600}
+.principle .body{color:var(--muted);font-size:.97rem}
+.verdicts{max-width:38rem;margin:0 auto;list-style:none;padding:0}
+.verdicts li{margin:.9rem 0;color:var(--muted);font-size:.97rem}
+.verdicts .v{font-weight:600;color:var(--fg);font-family:system-ui,sans-serif;font-size:.92rem}
+.closing{margin:4rem auto 0;padding:1.75rem 0 0;border-top:1px solid var(--border);text-align:center;font-size:1.1rem;font-style:italic;max-width:36rem}
+.sig{margin-top:1.5rem;text-align:center;color:var(--faint);font-style:normal;font-size:.9rem;font-family:system-ui,sans-serif}
+.repo{margin-top:2.5rem;text-align:center;font-family:system-ui,sans-serif;font-size:.85rem}
+.repo a{color:var(--accent);text-decoration:none}
+.repo a:hover{border-bottom:1px solid var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Refute, Don't Confirm</h1>
+  <hr class="rule">
+  <p class="preamble">A claim survives only by surviving attack. Green tests prove the machine ran;
+  they prove nothing about whether the conclusion is true. Before we report a result, we try to break
+  it. Through that work we have come to value:</p>
+</header>
+
+<ul class="values">
+  <li><span class="l">Refuting a claim</span><span class="over">over</span><span class="r">confirming it</span></li>
+  <li><span class="l">The rawest source</span><span class="over">over</span><span class="r">a tidy summary</span></li>
+  <li><span class="l">The weakest true statement</span><span class="over">over</span><span class="r">the strongest one that sounds provable</span></li>
+  <li><span class="l">n, and a significance gate</span><span class="over">over</span><span class="r">a single confident sample</span></li>
+  <li><span class="l">A named confound</span><span class="over">over</span><span class="r">a clean story</span></li>
+  <li><span class="l">A falsifier that already ran</span><span class="over">over</span><span class="r">evidence that is "coming"</span></li>
+</ul>
+
+<p class="caveat">That is, while the items on the right are tempting, we trust the items on the left.</p>
+
+<h2>The five checks</h2>
+
+<div class="principle"><span class="num">1</span><p><span class="lead">Reconcile from source.</span> <span class="body">Recompute the number from the rawest data on disk, never from a derived summary, and never from your own prior prose. A number you have not re-derived is unverified.</span></p></div>
+
+<div class="principle"><span class="num">2</span><p><span class="lead">Fairness.</span> <span class="body">Same conditions, budget, inputs, and n across everything compared. Name what differed; an unequal comparison is a confound wearing a result's clothes.</span></p></div>
+
+<div class="principle"><span class="num">3</span><p><span class="lead">Power.</span> <span class="body">What is n? One sample, one seed, one model is exploratory, not a finding. Does the claim's strength match the evidence's strength, and did it clear a gate?</span></p></div>
+
+<div class="principle"><span class="num">4</span><p><span class="lead">Confound.</span> <span class="body">What else could produce this besides the stated cause: a bug, a harness artifact, selection? Default to "there is a confound" until the obvious ones are ruled out.</span></p></div>
+
+<div class="principle"><span class="num">5</span><p><span class="lead">Falsifier.</span> <span class="body">What experiment would disprove this, and has it run? If it never executed, the claim is unproven. If the artifact is not on disk, the claim has outrun the evidence.</span></p></div>
+
+<h2>The verdicts</h2>
+<ul class="verdicts">
+  <li><span class="v">supported</span>: the evidence holds up under attack.</li>
+  <li><span class="v">exploratory-only</span>: an early signal, too little data to conclude.</li>
+  <li><span class="v">confounded</span>: something else could explain the result, so the comparison does not prove the claimed cause. Name the something else.</li>
+  <li><span class="v">unproven</span>: the experiment that would prove it has not been run.</li>
+  <li><span class="v">refuted</span>: the evidence points the other way.</li>
+</ul>
+
+<p class="closing">Report the weakest defensible restatement, with the uncertainty leading, not
+buried in a footnote. A clean "supported" is earned only after a genuine attempt to refute it failed.</p>
+
+<p class="sig">Justin Herrick, and anyone who would rather be right than confident</p>
+
+<p class="repo"><a href="https://github.com/jah2488/ultravalidate">ultravalidate</a> &nbsp;·&nbsp; a Claude Code skill that validates a claim before you trust it &nbsp;·&nbsp; fused, with three other disciplines, into <a href="https://github.com/jah2488/flint">flint</a></p>
+</body>
+</html>
