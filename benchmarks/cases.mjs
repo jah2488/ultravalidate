@@ -1,132 +1,116 @@
-// ultravalidate detection benchmark: each "flawed" case is a claim + context with ONE deliberately
-// planted validation flaw. Two tiers: OBVIOUS flaws (the confound is spelled out in the context)
-// and SUBTLE statistical traps (regression to the mean, survivorship, multiple comparisons, an
-// incomplete metric) that a plain reader tends to nod along to. "valid" cases are clean, powered,
-// reconciled claims (to measure over-flagging). A flaw is "caught" if the assessment matches every
-// regex in `need`. The same detector scores every arm, so the between-arm comparison is fair.
+// ultravalidate reconciliation benchmark. Each "flawed" case is a claim whose headline number is
+// WRONG, paired with a noisy context that contains the raw data the number should have come from.
+// Recomputing from that raw data gives a different value. A reviewer "catches" the case only by
+// actually re-deriving the correct number (matching every regex in `need`: the correct figure plus
+// a reconcile signal), not by vaguely suggesting a double-check. "valid" cases state a number that
+// DOES reconcile, to measure false alarms. This targets the regime ultravalidate is built for: a
+// long session where the model would otherwise trust a stated summary instead of going to source.
+// The same detector scores every arm, so the between-arm comparison is fair.
 
 export const ARMS = {
-  baseline: "You are reviewing a teammate's claim. Assess the claim below: should it be trusted?",
+  baseline: "You are reviewing a teammate's status update. Assess the claim below: should it be trusted?",
   skeptical:
-    "You are reviewing a teammate's claim. Assess the claim below: should it be trusted? " +
+    "You are reviewing a teammate's status update. Assess the claim below: should it be trusted? " +
     "Be skeptical and look hard for reasons it might be wrong.",
   ultravalidate: "ULTRAVALIDATE_SKILL", // built at runtime: baseline + the SKILL.md body
 };
 
+const NOISE_TOP =
+  "Sprint 41 wrap-up. Thanks everyone for a heavy two weeks. A few housekeeping notes before the " +
+  "numbers: the staging migration is done, on-call rotates to the platform pod Monday, and the " +
+  "design review for the new nav got pushed to next sprint. We also finally retired the legacy " +
+  "cron box. Hiring is still slow; two candidates in the final round.\n\n";
+const NOISE_MID =
+  "\nUnrelated but worth flagging: the flaky checkout test is quarantined, not fixed, so do not read " +
+  "too much into the green CI. The vendor invoice question is still open with finance. OKRs are " +
+  "locked for the quarter.\n\n";
+const NOISE_BOTTOM =
+  "\nNext sprint we pick up the search reindex and the billing webhook retries. Ping me with " +
+  "questions, otherwise see notes in the planning doc. Good work all.";
+// Noise for the valid cases: irrelevant but internally consistent, with no finance/audit tension that
+// a rigorous reviewer could legitimately flag (that tension is what NOISE_MID deliberately carries).
+const CLEAN_NOISE =
+  "\n\nElsewhere this sprint: the docs site got a refresh, we upgraded the CI runners, and the " +
+  "design team shipped the new icon set. On-call was quiet. Planning for next sprint is on the " +
+  "board.\n\nThanks all, see you at retro.";
+
 export const CASES = [
   {
-    id: "cache-p99",
-    flaw: "confounded",
+    id: "revenue-sum",
+    flaw: "reconciliation",
     scenario:
-      "Claim: 'Our new Redis cache cut p99 latency 40%.'\nContext: the cache shipped Tuesday. p99 " +
-      "dropped 40% that day. Tuesday was also a public holiday and total request volume was down about 30%.",
-    need: [/confound|traffic|load|volume|holiday|other (cause|factor|explanation)|coincid|not (just|only) the cache|can('|no)?t (credit|attribute)|drop in (traffic|requests|load)/i],
+      "Claim: 'Q3 revenue landed at $48,000, a strong quarter.'\n\nContext:\n" + NOISE_TOP +
+      "Revenue by month is in the finance export: July closed at $14,200, August at $13,500, and " +
+      "September at $11,300. Pipeline for Q4 looks healthier." + NOISE_MID +
+      "The board deck rounds the quarter to ~$48k in the headline slide." + NOISE_BOTTOM,
+    need: [/\$?39,?000|\$?39k|39 ?thousand/i, /sum|add(s|ed| up)?|recompute|reconcile|does ?n('|o)?t (match|add)|actually|14,?200.*13,?500.*11,?300|not \$?48|total(s|ed)? (to|\$)?/i],
   },
   {
-    id: "algo-speed",
-    flaw: "underpowered",
+    id: "conversion-pct",
+    flaw: "reconciliation",
     scenario:
-      "Claim: 'Algorithm B is 33% faster than A.'\nContext: B finished in 1.2s and A in 1.8s. Each " +
-      "was run exactly once on a shared laptop.",
-    need: [/once|single (run|sample|measurement)|n ?= ?1|variance|noise|repeat|more (runs|samples|trials)|not significant|underpowered|one (data ?point|run)/i],
+      "Claim: 'Trial-to-paid conversion is 25% this month, up and to the right.'\n\nContext:\n" + NOISE_TOP +
+      "From the growth dashboard: 1,200 trials started this month and 216 of them upgraded to a paid " +
+      "plan. Activation is steady." + NOISE_MID +
+      "The weekly email summarized it as 'conversion strong at 25%'." + NOISE_BOTTOM,
+    need: [/\b18 ?%|0?\.18\b/, /recompute|reconcile|does ?n('|o)?t match|actually|216 ?\/ ?1,?200|not 25|works? out to|comes? out to/i],
   },
   {
-    id: "tests-pass",
-    flaw: "unproven",
+    id: "latency-mean",
+    flaw: "reconciliation",
     scenario:
-      "Claim: 'All tests pass, so the CSV export feature works.'\nContext: the suite has no test that " +
-      "exercises the export path with quoted fields, empty files, or non-ASCII data.",
-    need: [/no test|do(es)?n('|o)?t (cover|exercise|test)|coverage|untested|edge case|pass(ing|es)? .* (not|does ?n'?t) (mean|prove|guarantee)|unproven/i],
+      "Claim: 'Average API latency is 120ms, within SLA.'\n\nContext:\n" + NOISE_TOP +
+      "Per-endpoint p50 from the last hour: /search 100ms, /cart 150ms, /checkout 300ms, /profile " +
+      "250ms. Traffic is roughly even across the four." + NOISE_MID +
+      "The status page tile shows '~120ms avg', inherited from an old config." + NOISE_BOTTOM,
+    need: [/\b200 ?ms|\b200\b/, /average|mean|recompute|reconcile|does ?n('|o)?t match|actually|not 120/i],
   },
   {
-    id: "conversion-math",
-    flaw: "unreconciled",
+    id: "tickets-count",
+    flaw: "reconciliation",
     scenario:
-      "Claim: 'Conversion rose to 12%.'\nContext: the source table shows 47 conversions out of 500 " +
-      "visitors for the period.",
-    need: [/9\.4|9%|47 ?\/ ?500|does ?n('|o)?t match|recompute|reconcile|actually (about )?9|the (math|number) (is|does)|recalc|not 12/i],
+      "Claim: 'We closed 50 tickets this sprint, a record.'\n\nContext:\n" + NOISE_TOP +
+      "Closed-ticket counts per engineer from the board: Ana 8, Ben 11, Cira 6, Dev 9, Eli 4. No one " +
+      "else closed anything this sprint." + NOISE_MID +
+      "Standup notes said 'roughly fifty done'." + NOISE_BOTTOM,
+    need: [/\b38\b/, /sum|add(s|ed| up)?|recompute|reconcile|does ?n('|o)?t (match|add)|actually|8.*11.*6.*9.*4|not 50|total(s|ed)?/i],
   },
   {
-    id: "model-eval",
-    flaw: "unfair",
+    id: "mau-growth",
+    flaw: "reconciliation",
     scenario:
-      "Claim: 'Model X beat model Y on our eval, so X is the better model.'\nContext: X was given a 3x " +
-      "larger token budget than Y, and the eval questions were chosen by the team that built X.",
-    need: [/unfair|3x|budget|more (tokens|compute|budget)|apples|equal (conditions|budget|footing)|selection|chose|picked|same (budget|conditions)|not a fair/i],
+      "Claim: 'Monthly active users grew 40% month over month.'\n\nContext:\n" + NOISE_TOP +
+      "From the analytics export: MAU was 50,000 in May and 62,000 in June. Retention cohorts look " +
+      "stable." + NOISE_MID +
+      "The all-hands slide said 'MAU up ~40%'." + NOISE_BOTTOM,
+    need: [/\b24 ?%|\b24\b/, /recompute|reconcile|does ?n('|o)?t match|actually|12,?000 ?\/ ?50,?000|not 40|works? out to|comes? out to/i],
   },
   {
-    id: "retention-feature",
-    flaw: "confounded",
+    id: "error-rate",
+    flaw: "reconciliation",
     scenario:
-      "Claim: 'Users of feature F retain twice as well, so F drives retention.'\nContext: F is opt-in, " +
-      "and the users who turn it on are already the most active power users.",
-    need: [/select|self[- ]?select|correlation|causation|confound|power users|already (active|engaged)|opt-?in|reverse|cause|the kind of user/i],
+      "Claim: 'Error rate held at 0.5%, no regression.'\n\nContext:\n" + NOISE_TOP +
+      "From the logs for the window: 12,000 errored requests out of 800,000 total. The spike on " +
+      "Tuesday was a deploy, since rolled back." + NOISE_MID +
+      "The dashboard annotation still reads '0.5% errors' from before the incident." + NOISE_BOTTOM,
+    need: [/\b1\.5 ?%|\b1\.5\b/, /recompute|reconcile|does ?n('|o)?t match|actually|12,?000 ?\/ ?800,?000|not 0\.5|works? out to|comes? out to/i],
   },
+  // valid: the headline number reconciles with the raw source, presented in-context with no internal
+  // contradiction, so a correct review confirms it (uses CLEAN_NOISE, not the contradictory NOISE_MID).
   {
-    id: "refactor-perf",
-    flaw: "unproven",
-    scenario:
-      "Claim: 'This refactor will make the endpoint faster.'\nContext: no benchmark or profile has " +
-      "been run before or after the change.",
-    need: [/no (benchmark|profile|measurement|data)|have ?n('|o)?t (measured|benchmarked|profiled)|measure (it|first)|profile|unproven|without (data|evidence)|before .* (claim|conclude)|prediction/i],
-  },
-  {
-    id: "prompt-vibes",
-    flaw: "exploratory",
-    scenario:
-      "Claim: 'The new prompt is better, let's ship it.'\nContext: it was tried on one example and the " +
-      "output looked nicer.",
-    need: [/one example|single|anecdot|exploratory|vibes?|not enough|too (early|soon|few)|more (data|examples|testing)|cherry|n ?= ?1|sample of (one|1)/i],
-  },
-  // --- subtle statistical traps: the context does NOT name the flaw; a plain reader tends to agree ---
-  {
-    id: "rep-coaching",
-    flaw: "regression to the mean",
-    scenario:
-      "Claim: 'We coached our 10 lowest-scoring support reps and their CSAT rose 15 points the next " +
-      "quarter, so the coaching worked.'\nContext: the 10 reps were picked precisely because they " +
-      "scored at the very bottom that quarter.",
-    need: [/regress(ion)?( to (the )?(mean|average))?|mean reversion|lowest.{0,40}(improve|rise|rebound|go up|recover).{0,20}(anyway|regardless|on their own|without)|extreme.{0,30}(return|revert|bounce)|(picked|chosen|selected) because.{0,30}(low|bottom|worst)|would have (improved|risen|gone up)|not (necessarily )?(due to |from )?the coaching/i],
-  },
-  {
-    id: "tenure-satisfaction",
-    flaw: "survivorship bias",
-    scenario:
-      "Claim: '95% of customers who have been with us 3+ years say they are satisfied, so our product " +
-      "builds loyalty.'\nContext: customers who were unhappy churned in their first year and are not " +
-      "in the 3-year group.",
-    need: [/survivor(ship)?|churn(ed)?|(unhappy|dissatisfied|unsatisfied).{0,30}(left|gone|churn|excluded|not (counted|included))|only (those|the ones|customers) (who )?(stayed|remained|survived)|self[- ]?select|those who left|drop(ped)? out|biased sample|selection (bias|effect)/i],
-  },
-  {
-    id: "button-variants",
-    flaw: "multiple comparisons",
-    scenario:
-      "Claim: 'We A/B tested 20 button variants and the green one reached p < 0.05, so we should ship " +
-      "green.'\nContext: only that one of the 20 crossed p < 0.05, and no correction was applied for " +
-      "running 20 tests at once.",
-    need: [/multiple comparison|20 (test|variant|hypothes|arm)|bonferroni|(false positive|one).{0,25}(expect|chance)|by chance|correction|p-?hack|family[- ]?wise|at least one.{0,25}(significant|cross|p ?<)|testing (many|so many|20)|1 (in|of|out of) 20|cherry/i],
-  },
-  {
-    id: "fraud-recall",
-    flaw: "incomplete metric",
-    scenario:
-      "Claim: 'Our fraud model catches 98% of fraud, so it is reliable enough to auto-block accounts.'" +
-      "\nContext: the 98% is recall only; the false-positive rate and the base rate of fraud were not " +
-      "reported.",
-    need: [/false[- ]?positive|base rate|precision|specificity|(legitimate|genuine|real|good|innocent).{0,30}(flag|block|caught|account)|recall (alone|only|by itself|isn'?t|does ?n'?t|without)|how many.{0,30}(wrongly|incorrectly|legit)|denominator|both (metric|rate|number)|miss(ing|es)?.{0,20}(false|precision|positive)/i],
-  },
-  {
-    id: "valid-ab",
+    id: "valid-revenue",
     flaw: null,
     scenario:
-      "Claim: 'Checkout errors fell from 3.1% to 2.4%.'\nContext: a randomized A/B test with 10,000 " +
-      "users per arm over two weeks, difference significant at p < 0.01.",
+      "Claim: 'Q3 revenue landed at $39,000.'\n\nContext:\n" + NOISE_TOP +
+      "From the raw ledger export, the complete set of Q3 entries: July $14,200, August $13,500, " +
+      "September $11,300. These three are the only Q3 revenue rows." + CLEAN_NOISE,
   },
   {
-    id: "valid-reconciled",
+    id: "valid-conversion",
     flaw: null,
     scenario:
-      "Claim: 'Q3 revenue was $48,210.'\nContext: recomputed from the raw ledger (sum of 1,204 " +
-      "transactions = $48,210) and it matches the dashboard total exactly.",
+      "Claim: 'Trial-to-paid conversion is 18% this month.'\n\nContext:\n" + NOISE_TOP +
+      "From the raw events table for the month: 1,200 rows of trial_started and 216 rows of " +
+      "trial_converted_to_paid, with no other relevant events." + CLEAN_NOISE,
   },
 ];

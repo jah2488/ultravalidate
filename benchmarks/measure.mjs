@@ -15,7 +15,7 @@ import { CASES } from "./cases.mjs";
 // (does the assessment land on trust/supported?), not the presence of words like "confound" (which
 // appear as check headers in a structured assessment even when the verdict is "supported"). The
 // earlier keyword metric mistook that vocabulary for rejection.
-const TRUST = /(verdict[:*\s]*\**\s*(supported|sound|valid|trustworthy))|trust(worthy)?\b|holds up|well[- ]supported|is (sound|reliable|valid|credible|solid|trustworthy)|(would|'d|can|reasonable to) (trust|accept|believe|act)|no (significant )?(flaw|problem|issue)|appears (sound|valid|correct)/i;
+const TRUST = /(verdict[:*\s]*\**\s*(supported|sound|valid|trustworthy))|trust(worthy)?\b|holds up|well[- ]supported|is (sound|reliable|valid|credible|solid|trustworthy)|(would|'d|can|reasonable to) (trust|accept|believe|act)|no (significant )?(flaw|problem|issue)|appears (sound|valid|correct)|reconciles|matches( the| up)?|adds up|checks out|the (math|number|total|sum)s? (is |are |all )?(correct|right|check)/i;
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const byId = Object.fromEntries(CASES.map((c) => [c.id, c]));
