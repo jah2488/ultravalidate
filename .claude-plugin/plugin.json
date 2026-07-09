@@ -1,6 +1,6 @@
 {
   "name": "ultravalidate",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Adversarial validation of a claim: refute before confirming, reconcile from source, hunt confounds, report the weakest defensible restatement. Use before trusting any result, number, or PR claim.",
   "author": {
     "name": "Justin Herrick"
